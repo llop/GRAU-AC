@@ -1,0 +1,76 @@
+
+1 - 
+
+pand:    and de bits 
+pcmpgtb: comparació major per un pack de 16 bytes
+movdqa:  moure un double quadword d'una adressa alineada a 16 bytes
+movdqu:  moure un double quadword
+emms:    buida els registres mmx
+
+
+2 - 
+
+__attribute__: permet especificar atributs de vaiables o structs
+aligned: estableix l'alineació en bytes de l'adreça on va una variable o struct
+
+int x __attribute__ ((aligned (16))) = 0;  // l'adreça de x alineada a 16 bytes
+
+
+3 - 
+
+	movl	8(%ebp), %eax		# eax = @mata
+	movl	12(%ebp), %ebx		# ebx = @matb
+	movl	16(%ebp), %ecx		# 
+	imul	%ecx, %ecx		# ecx = n * n
+	xorl	%edi, %edi		# i = 0
+for:	cmpl	%ecx, %edi		# i < n * n ?
+	jge	endfor
+	movb	(%eax, %edi), %ah	# 
+	andb	$1, %ah			# ah = mata[i] & 1
+if:	cmpb	$0, %ah			# ah != 0 ?
+	je	else
+	movb	$255, (%ebx, %edi)	# matb[i] = 255
+	jmp	endif
+else:	movb	$0, (%ebx, %edi)	# matb[i] = 0
+endif:	incl	%edi			# ++i
+	jmp	for
+endfor:	
+
+
+4 - 
+
+No se puede cargar un inmediato en un registro xmm con movdqu.
+Hay que declarar una variable de 16 bytes, y referenciarla: movdqu (variable), %xmm1
+
+
+5 - 
+
+	movl	8(%ebp), %eax		# eax = @mata
+	movl	12(%ebp), %ebx		# ebx = @matb
+	movl	16(%ebp), %ecx		# 
+	imul	%ecx, %ecx		# ecx = n * n
+	xorl	%edi, %edi		# i = 0
+for:	cmpl	%ecx, %edi		# i < n * n ?
+	jge	endfor
+	
+	movdqu	(ones), %xmm1		# 
+	pand	(%eax, %edi), %xmm1	# xmm1 = mata[i] & 1, mata[i + 1] & 1, ..., mata[i + 15] & 1
+	pcmpgtb	(zeros), %xmm1
+	movdqu	%xmm1, (%ebx, %edi)
+
+	addl	$16, %edi
+	jmp	for
+endfor:
+
+
+6 - 
+	
+	# comprobar si %edi es múltiplo de 16
+	movl	%edi, %eax
+	andl	$15, %eax
+	cmpl	$0, %eax
+	je	es_multiplo_de 16  # si %eax es 0, %edi es múltiplo de 16
+
+
+
+
