@@ -4,7 +4,7 @@
 
 Col·lecció de les pràctiques de laboratori
 
-* Assembler
+* Assembly
 * Cache Simulators
 * SIMD (Single Instruction Multiple Data)
 
